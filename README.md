@@ -163,7 +163,7 @@ func NewHandler() *http.ServeMux {
 
 We use http.ServeMux to handle our endpoints, we create two endpoints for our service.
 
-The first endpoint 'tracking' let's us save the last location sent from a driver, in this case we only want to save the last location so we are going remove the previous location of the driver and then save the new one. We could modify this endpoint so that previous locations are saved in another database.
+The first endpoint 'tracking' let's us save the last location sent from a driver, in this case we only want to save the last location. We could modify this endpoint so that previous locations are saved in another database.
 
 ```go
 func tracking(w http.ResponseWriter, r *http.Request) {
@@ -181,9 +181,6 @@ func tracking(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not decode request", http.StatusInternalServerError)
 		return
 	}
-
-	// Remove last drive location
-	rClient.RemoveDriverLocation(driver.ID)
 
 	// Add new location
 	// You can save locations in another db

@@ -32,9 +32,6 @@ func tracking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Remove last drive location
-	rClient.RemoveDriverLocation(driver.ID)
-
 	// Add new location
 	// You can save locations in another db
 	rClient.AddDriverLocation(driver.Lng, driver.Lat, driver.ID)
