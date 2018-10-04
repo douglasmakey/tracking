@@ -1,6 +1,6 @@
 # Tracking Service V2
 
-Do you remember my last article where I wrote a service to look for a driver like uber? If not, you can check [here](LINK) So now, we going to write the V2 of our service.
+Do you remember my last article where I wrote a service to look for a driver like uber? If not, you can check [here](https://github.com/douglasmakey/tracking/blob/master/README.md) So now, we going to write the V2 of our service.
 
 The current state of our service, when a user consumes the resource 'search', the user receives a response with the closer driver to him. But what would happen if there are no drivers close to the user? We don't want the service client doing a big amount of requests to the same endpoint to look for a driver. What we want to do is to follow the pattern Uber uses and that is that our client makes only one request and this request raises a task that looks for a driver to us for X time and, later on, the user receives the result.
 
