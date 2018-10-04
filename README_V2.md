@@ -1,4 +1,4 @@
-# Tracking Service V2
+# Tracking Service V2
 
 Do you remember my last article where I wrote a service to look for a driver like uber? If not, you can check [here](LINK) So now, we going to write the V2 of our service.
 
@@ -9,7 +9,7 @@ For doing this we are going to use some of the tools Go provides us: Goroutines,
 
 NOTE: This will be a basic implementation.
 
-## Goroutine
+## Goroutine
 ~~A goroutine is a lightweight, costing little more than the allocation of stack space. And the stacks start small, so they are cheap, and grow by allocating (and freeing) heap storage as required.~~
 
 To run a function as a goroutine, just simply put the keyword `go` before a func call. When the func is done, the goroutine exits, silently.
@@ -23,7 +23,7 @@ NOTE: Goroutines run in the same address space, so access to shared memory must 
 
 [Effective Go - Goroutines ](https://golang.org/doc/effective_go.html?#goroutines)
 
-## Channels
+## Channels
 ~~Channels are a typed conduit through which you can send and receive values with the channel operator, <-.~~
 
 ```go
