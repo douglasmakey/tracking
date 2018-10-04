@@ -6,20 +6,13 @@ import (
 	"log"
 
 	"github.com/douglasmakey/tracking/storages"
-	)
-
-func NewHandler() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/tracking", tracking)
-	mux.HandleFunc("/search", search)
-	return mux
-}
+)
 
 // tracking receive the driver coord and saves the coord in redis
 func tracking(w http.ResponseWriter, r *http.Request) {
 	// crate an anonymous struct for driver data.
 	var driver = struct {
-		ID string `json:"id"`
+		ID  string  `json:"id"`
 		Lat float64 `json:"lat"`
 		Lng float64 `json:"lng"`
 	}{}
@@ -45,9 +38,9 @@ func search(w http.ResponseWriter, r *http.Request) {
 	rClient := storages.GetRedisClient()
 
 	body := struct {
-		Lat float64 `json:"lat"`
-		Lng float64 `json:"lng"`
-		Limit int `json:"limit"`
+		Lat   float64 `json:"lat"`
+		Lng   float64 `json:"lng"`
+		Limit int     `json:"limit"`
 	}{}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {

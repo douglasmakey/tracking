@@ -1,4 +1,7 @@
 # Tracking Service with Go and Redis.
+
+[README V2](https://github.com/douglasmakey/tracking/blob/master/README_V2.md)
+
 Imagine that we work at a startup like Uber and we need to create a new service that saves drivers locations every given time and processes it. This way, when someone requests a driver we can find out which drivers are closer to our picking point.
 
 This is the core of our service. Save the locations and search nearby drivers. For this service we are using Go and Redis.
