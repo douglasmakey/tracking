@@ -63,10 +63,12 @@ func (r *RequestDriverTask) Run() {
 				return
 			}
 
-		case <-done:
-			sendInfo(r, fmt.Sprintf("Driver %s found", r.DriverID))
-			ticker.Stop()
-			return
+		case _, ok := <-done:
+			if !ok {
+				sendInfo(r, fmt.Sprintf("Driver %s found", r.DriverID))
+				ticker.Stop()
+				return
+			}
 		}
 	}
 }
