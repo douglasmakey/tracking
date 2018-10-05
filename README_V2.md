@@ -208,7 +208,7 @@ func (r *RequestDriverTask) doSearch(done chan struct{}) {
 		// Remove driver location, we can send a message to the driver for that it does not send again its location to this service.
 		rClient.RemoveDriverLocation(drivers[0].Name)
 		r.DriverID = drivers[0].Name
-		done <- true
+		close(done)
 	}
 
 	return
