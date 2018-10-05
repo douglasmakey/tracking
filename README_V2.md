@@ -40,11 +40,26 @@ ci := make(chan int)            // unbuffered channel of integers
 cj := make(chan int, 0)         // unbuffered channel of integers
 cs := make(chan *os.File, 100)  // buffered channel of pointers to Files
 ```
+Unbuffered channels combine communication—the exchange of a value—with synchronization—guaranteeing that two calculations (goroutines) are in a known state.
+
+
+There are lots of nice idioms using channels. Here's one to get us started. In the previous section we launched a sort in the background. A channel can allow the launching goroutine to wait for the sort to complete.
+
+```go
+c := make(chan int)  // Allocate a channel.
+// Start the sort in a goroutine; when it completes, signal on the channel.
+go func() {
+    list.Sort()
+    c <- 1  // Send a signal; value does not matter.
+}()
+doSomethingForAWhile()
+<-c   // Wait for sort to finish; discard sent value.
+```
+
+Receivers always block until there is data to receive. If the channel is unbuffered, the sender blocks until the receiver has received the value. If the channel has a buffer, the sender blocks only until the value has been copied to the buffer; if the buffer is full, this means waiting until some receiver has retrieved a value.
+
 
 [Effective Go - Channels ](https://golang.org/doc/effective_go.html?#channels)
-
-
-NOTE: By default, sends and receives block until the other side is ready. This allows goroutines to synchronize without explicit locks or condition variables.
 
 ## time.Ticker
 
@@ -87,10 +102,9 @@ First, we will create a new folder called tasks, inside we create a 'request.go'
 // FILE: tasks/search.go
 
 // These are the reasons which a request is invalid.
-const (
-	Expired = "expired"
-	Canceled = "canceled"
-
+var (
+	ErrExpired  = errors.New("request expired")
+	ErrCanceled = errors.New("request canceled")
 )
 
 // RequestDriverTask is a simple struct that contains info about the user, request and driver, you can add more information if you want.
@@ -129,19 +143,22 @@ func (r *RequestDriverTask) Run() {
 		// The select statement lets a goroutine wait on multiple communication operations.
 		select {
 		case <-ticker.C:
-			isValid, reason := r.validateRequest()
-			if !isValid {
-				if reason == Expired {
-					// Notify to user that the request expired.
-					sendInfo(r, "Sorry, we did not find any driver.")
-				} else if reason == Canceled {
-					log.Printf("Request %s has been canceled. ", r.ID)
-				}
+			err := r.validateRequest()
+			switch err {
+			case nil:
+				log.Println(fmt.Sprintf("Search Driver - Request %s for Lat: %f and Lng: %f", r.ID, r.Lat, r.Lng))
+				go r.doSearch(done)
+			case ErrExpired:
+				// Notify to user that the request expired.
+				sendInfo(r, "Sorry, we did not find any driver.")
+				return
+			case ErrCanceled:
+				log.Printf("Request %s has been canceled. ", r.ID)
+				return
+			default: // defensive programming: expected the unexpected
+				log.Printf("unexpected error: %v", err)
 				return
 			}
-
-			log.Println(fmt.Sprintf("Search Driver - Request %s for Lat: %f and Lng: %f", r.ID, r.Lat, r.Lng))
-			go r.doSearch(done)
 
 		case <-done:
 			sendInfo(r, fmt.Sprintf("Driver %s found", r.DriverID))
@@ -155,29 +172,29 @@ func (r *RequestDriverTask) Run() {
 
 Ok, now we going to create two methods for RequestDriverTask.
 
-The first method is **validateRequest**, this function validates the key, if the key is active or if the key expired and will return false and the reason if the request is not valid.
+The first method is **validateRequest**, this function validates the key, if the key is active or if the key expired and will return error like a reason if the request is not valid.
 
 The second method is **doSearch**, this function uses our RedisClient and its function SearchDrivers for doing search.
 
 ```go
 // FILE: tasks/search.go
 
-// validateRequest validates if the request is valid and return a string like a reason in case not.
-func (r *RequestDriverTask) validateRequest() (bool, string) {
+// validateRequest validates if the request is valid and return an error like a reason in case not.
+func (r *RequestDriverTask) validateRequest() error {
 	rClient := storages.GetRedisClient()
 	keyValue, err := rClient.Get(r.ID).Result()
 	if err != nil {
 		// Request has been expired.
-		return false, Expired
+		return ErrExpired
 	}
 
 	isActive, _ := strconv.ParseBool(keyValue)
 	if !isActive {
 		// Request has been canceled.
-		return false, Canceled
+		return ErrCanceled
 	}
 
-	return true, ""
+	return nil
 }
 
 // doSearch do the search of a driver and send a signal to the channel.

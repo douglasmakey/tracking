@@ -2,8 +2,8 @@ package storages
 
 import (
 	"github.com/go-redis/redis"
-	"sync"
 	"log"
+	"sync"
 )
 
 type RedisClient struct {
@@ -47,14 +47,14 @@ func (c *RedisClient) RemoveDriverLocation(id string) {
 
 func (c *RedisClient) SearchDrivers(limit int, lat, lng, r float64) []redis.GeoLocation {
 	/*
-	WITHDIST: Also return the distance of the returned items from the
-	specified center. The distance is returned in the same unit as the unit
-	specified as the radius argument of the command.
-	WITHCOORD: Also return the longitude,latitude coordinates of the matching items.
-	WITHHASH: Also return the raw geohash-encoded sorted set score of the item,
-	in the form of a 52 bit unsigned integer. This is only useful for low level
-	hacks or debugging and is otherwise of little interest for the general user.
-	 */
+		WITHDIST: Also return the distance of the returned items from the
+		specified center. The distance is returned in the same unit as the unit
+		specified as the radius argument of the command.
+		WITHCOORD: Also return the longitude,latitude coordinates of the matching items.
+		WITHHASH: Also return the raw geohash-encoded sorted set score of the item,
+		in the form of a 52 bit unsigned integer. This is only useful for low level
+		hacks or debugging and is otherwise of little interest for the general user.
+	*/
 
 	res, _ := c.GeoRadius(key, lng, lat, &redis.GeoRadiusQuery{
 		Radius:      r,

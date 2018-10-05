@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"testing"
-	"net/http"
 	"bytes"
-	"net/http/httptest"
 	"encoding/json"
 	"github.com/douglasmakey/tracking/storages"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestHandlerTracking(t *testing.T) {
@@ -49,8 +49,8 @@ func TestHandlerSearch(t *testing.T) {
 	}
 
 	result := []struct {
-		Name  string
-		Latitude float64
+		Name      string
+		Latitude  float64
 		Longitude float64
 	}{}
 

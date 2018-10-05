@@ -1,10 +1,10 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
-	"log"
 	"github.com/douglasmakey/tracking/handler"
+	"log"
+	"net/http"
 )
 
 func main() {

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"net/http"
 	"github.com/douglasmakey/tracking/handler/v2"
+	"net/http"
 )
 
 func NewHandler() *http.ServeMux {

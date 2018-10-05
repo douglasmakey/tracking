@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"net/http"
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"github.com/douglasmakey/tracking/storages"
 )
