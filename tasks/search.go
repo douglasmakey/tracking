@@ -40,7 +40,7 @@ func (r *RequestDriverTask) Run() {
 	ticker := time.NewTicker(time.Second * 30)
 
 	// With the done channel, we receive if the driver was found
-	done := make(chan bool, 1)
+	done := make(chan struct{})
 
 	for {
 		// The select statement lets a goroutine wait on multiple communication operations.
@@ -90,7 +90,7 @@ func (r *RequestDriverTask) validateRequest() error {
 }
 
 // doSearch do search of driver and send signal to the channel.
-func (r *RequestDriverTask) doSearch(done chan bool) {
+func (r *RequestDriverTask) doSearch(done chan struct{}) {
 	rClient := storages.GetRedisClient()
 	drivers := rClient.SearchDrivers(1, r.Lat, r.Lng, 5)
 	if len(drivers) == 1 {
@@ -98,7 +98,7 @@ func (r *RequestDriverTask) doSearch(done chan bool) {
 		// Remove driver location, we can send a message to the driver for that it does not send again its location to this service.
 		rClient.RemoveDriverLocation(drivers[0].Name)
 		r.DriverID = drivers[0].Name
-		done <- true
+		close(done)
 	}
 
 	return
