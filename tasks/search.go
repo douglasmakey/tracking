@@ -2,9 +2,9 @@ package tasks
 
 import (
 	"fmt"
-	"time"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/douglasmakey/tracking/storages"
 )
