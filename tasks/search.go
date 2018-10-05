@@ -12,7 +12,7 @@ import (
 
 // These are the reasons which a request is invalid.
 var (
-	ErrExpired  = error.New("request expired")
+	ErrExpired  = errors.New("request expired")
 	ErrCanceled = errors.New("request canceled")
 )
 
@@ -46,7 +46,8 @@ func (r *RequestDriverTask) Run() {
 		// The select statement lets a goroutine wait on multiple communication operations.
 		select {
 		case <-ticker.C:
-			switch r.validateRequest() {
+			err := r.validateRequest()
+			switch err {
 			case nil:
 				log.Println(fmt.Sprintf("Search Driver - Request %s for Lat: %f and Lng: %f", r.ID, r.Lat, r.Lng))
 				go r.doSearch(done)
@@ -70,7 +71,7 @@ func (r *RequestDriverTask) Run() {
 	}
 }
 
-// validateRequest validates if the request is valid and return a string like a reason in case not.
+// validateRequest validates if the request is valid and return an error like a reason in case not.
 func (r *RequestDriverTask) validateRequest() error {
 	rClient := storages.GetRedisClient()
 	keyValue, err := rClient.Get(r.ID).Result()

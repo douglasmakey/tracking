@@ -102,10 +102,9 @@ First, we will create a new folder called tasks, inside we create a 'request.go'
 // FILE: tasks/search.go
 
 // These are the reasons which a request is invalid.
-const (
-	Expired = "expired"
-	Canceled = "canceled"
-
+var (
+	ErrExpired  = errors.New("request expired")
+	ErrCanceled = errors.New("request canceled")
 )
 
 // RequestDriverTask is a simple struct that contains info about the user, request and driver, you can add more information if you want.
@@ -144,19 +143,22 @@ func (r *RequestDriverTask) Run() {
 		// The select statement lets a goroutine wait on multiple communication operations.
 		select {
 		case <-ticker.C:
-			isValid, reason := r.validateRequest()
-			if !isValid {
-				if reason == Expired {
-					// Notify to user that the request expired.
-					sendInfo(r, "Sorry, we did not find any driver.")
-				} else if reason == Canceled {
-					log.Printf("Request %s has been canceled. ", r.ID)
-				}
+			err := r.validateRequest()
+			switch err {
+			case nil:
+				log.Println(fmt.Sprintf("Search Driver - Request %s for Lat: %f and Lng: %f", r.ID, r.Lat, r.Lng))
+				go r.doSearch(done)
+			case ErrExpired:
+				// Notify to user that the request expired.
+				sendInfo(r, "Sorry, we did not find any driver.")
+				return
+			case ErrCanceled:
+				log.Printf("Request %s has been canceled. ", r.ID)
+				return
+			default: // defensive programming: expected the unexpected
+				log.Printf("unexpected error: %v", err)
 				return
 			}
-
-			log.Println(fmt.Sprintf("Search Driver - Request %s for Lat: %f and Lng: %f", r.ID, r.Lat, r.Lng))
-			go r.doSearch(done)
 
 		case <-done:
 			sendInfo(r, fmt.Sprintf("Driver %s found", r.DriverID))
@@ -170,29 +172,29 @@ func (r *RequestDriverTask) Run() {
 
 Ok, now we going to create two methods for RequestDriverTask.
 
-The first method is **validateRequest**, this function validates the key, if the key is active or if the key expired and will return false and the reason if the request is not valid.
+The first method is **validateRequest**, this function validates the key, if the key is active or if the key expired and will return error like a reason if the request is not valid.
 
 The second method is **doSearch**, this function uses our RedisClient and its function SearchDrivers for doing search.
 
 ```go
 // FILE: tasks/search.go
 
-// validateRequest validates if the request is valid and return a string like a reason in case not.
-func (r *RequestDriverTask) validateRequest() (bool, string) {
+// validateRequest validates if the request is valid and return an error like a reason in case not.
+func (r *RequestDriverTask) validateRequest() error {
 	rClient := storages.GetRedisClient()
 	keyValue, err := rClient.Get(r.ID).Result()
 	if err != nil {
 		// Request has been expired.
-		return false, Expired
+		return ErrExpired
 	}
 
 	isActive, _ := strconv.ParseBool(keyValue)
 	if !isActive {
 		// Request has been canceled.
-		return false, Canceled
+		return ErrCanceled
 	}
 
-	return true, ""
+	return nil
 }
 
 // doSearch do the search of a driver and send a signal to the channel.
