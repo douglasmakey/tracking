@@ -91,7 +91,7 @@ func (r *RequestDriverTask) validateRequest() error {
 	return nil
 }
 
-// doSearch do search of driver and send signal to the channel.
+// doSearch do search of driver and close to the channel.
 func (r *RequestDriverTask) doSearch(done chan struct{}) {
 	rClient := storages.GetRedisClient()
 	drivers := rClient.SearchDrivers(1, r.Lat, r.Lng, 5)

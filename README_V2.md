@@ -137,7 +137,7 @@ func (r *RequestDriverTask) Run() {
 	ticker := time.NewTicker(time.Second * 30)
 
 	// With the done channel, we receive if the driver was found
-	done := make(chan bool, 1)
+	done := make(chan struct{})
 
 	for {
 		// The select statement lets a goroutine wait on multiple communication operations.
@@ -160,10 +160,12 @@ func (r *RequestDriverTask) Run() {
 				return
 			}
 
-		case <-done:
-			sendInfo(r, fmt.Sprintf("Driver %s found", r.DriverID))
-			ticker.Stop()
-			return
+		case _, ok := <-done:
+			if !ok {
+				sendInfo(r, fmt.Sprintf("Driver %s found", r.DriverID))
+				ticker.Stop()
+				return
+			}
 		}
 	}
 }
@@ -197,8 +199,8 @@ func (r *RequestDriverTask) validateRequest() error {
 	return nil
 }
 
-// doSearch do the search of a driver and send a signal to the channel.
-func (r *RequestDriverTask) doSearch(done chan bool) {
+// doSearch do search of driver and close to the channel.
+func (r *RequestDriverTask) doSearch(done chan struct{}) {
 	rClient := storages.GetRedisClient()
 	drivers := rClient.SearchDrivers(1, r.Lat, r.Lng, 5)
 	if len(drivers) == 1 {
