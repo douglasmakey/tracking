@@ -10,6 +10,10 @@ import (
 
 // tracking receive the driver coord and saves the coord in redis
 func tracking(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	// crate an anonymous struct for driver data.
 	var driver = struct {
 		ID  string  `json:"id"`
@@ -35,6 +39,10 @@ func tracking(w http.ResponseWriter, r *http.Request) {
 
 // search receives lat and lng of the picking point and searches drivers about this point.
 func search(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	rClient := storages.GetRedisClient()
 
 	body := struct {

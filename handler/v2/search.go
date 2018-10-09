@@ -13,6 +13,10 @@ import (
 )
 
 func SearchV2(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	rClient := storages.GetRedisClient()
 	// We use Redis to keep a key unique for each request.
 	// With this key also we will know if the request is active or if the user canceled the request.
@@ -46,6 +50,10 @@ func SearchV2(w http.ResponseWriter, r *http.Request) {
 }
 
 func CancelRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	rClient := storages.GetRedisClient()
 
 	body := struct {
