@@ -59,12 +59,11 @@ func GetRedisClient() *RedisClient {
 		})
 
 		redisClient = &RedisClient{client}
-	})
-
-	_, err := redisClient.Ping().Result()
-	if err != nil {
-		log.Fatalf("Could not connect to redis %v", err)
-	}
+        _, err := redisClient.Ping().Result()
+        if err != nil {
+            log.Fatalf("Could not connect to redis %v", err)
+        }
+    })
 
 	return redisClient
 }
