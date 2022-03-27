@@ -10,7 +10,7 @@ import (
 func main() {
 	// We create a simple httpserver
 	server := http.Server{
-		Addr:    fmt.Sprint(":8000"),
+		Addr:    ":8000",
 		Handler: handler.NewHandler(),
 	}
 
